@@ -552,7 +552,7 @@ set.seed(8675309) # Jenny, I&#39;ve got your number</code></pre>
   ggplot(aes(p, fill = analysis, color = analysis)) +
   geom_density(alpha = 0.1) +
   facet_grid(effect~., scales = &quot;free_y&quot;)</code></pre>
-<p><img src="/posts/lmer_vs_anova_files/figure-html/plot-power-p-1.png" width="960" /></p>
+<p><img src="/drafts/lmer_vs_anova_files/figure-html/plot-power-p-1.png" width="960" /></p>
 <pre class="r"><code>power %&gt;%
   filter(effect != &quot;(Intercept)&quot;, analysis != &quot;lmer&quot;) %&gt;%
   group_by(analysis, effect) %&gt;%
@@ -562,7 +562,7 @@ set.seed(8675309) # Jenny, I&#39;ve got your number</code></pre>
   geom_density(alpha = 0.1) +
   geom_vline(aes(xintercept = mean_es, color = analysis)) +
   facet_grid(effect~., scales = &quot;free_y&quot;)</code></pre>
-<p><img src="/posts/lmer_vs_anova_files/figure-html/plot-es-anova-1.png" width="960" /></p>
+<p><img src="/drafts/lmer_vs_anova_files/figure-html/plot-es-anova-1.png" width="960" /></p>
 <pre class="r"><code>power %&gt;%
   filter(effect != &quot;(Intercept)&quot;, analysis == &quot;lmer&quot;) %&gt;%
   group_by(analysis, effect) %&gt;%
@@ -572,5 +572,5 @@ set.seed(8675309) # Jenny, I&#39;ve got your number</code></pre>
   geom_density(alpha = 0.1) +
   geom_vline(aes(xintercept = mean_es, color = analysis)) +
   facet_grid(effect~., scales = &quot;free_y&quot;)</code></pre>
-<p><img src="/posts/lmer_vs_anova_files/figure-html/plot-es-lmer-1.png" width="960" /></p>
+<p><img src="/drafts/lmer_vs_anova_files/figure-html/plot-es-lmer-1.png" width="960" /></p>
 </div>
