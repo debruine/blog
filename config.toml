@@ -89,11 +89,15 @@ MathJaxVersion = "2.7.1"
     weight = 1
     url  = "/posts/"
 [[menu.main]]
-    name = "Projects"
+    name = "Tutorials"
     weight = 2
+    url = "/tutorials/"
+[[menu.main]]
+    name = "Projects"
+    weight = 3
     url = "/projects/"
 [[menu.main]]
     name = "About"
-    weight = 3
+    weight = 4
     url = "/about/"
 
