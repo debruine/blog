@@ -57,6 +57,7 @@ my_theme &lt;- theme(
   xlab(&quot;Participant Sex&quot;) +
   scale_fill_manual(values = c(&quot;#3D66CC&quot;, &quot;#892110&quot;)) +
   my_theme</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;sex&#39; (override with `.groups` argument)</code></pre>
 <p><img src="/posts/plot_comparison_files/figure-html/plotcomp-bar-1.png" width="672" /></p>
 <pre class="r"><code>#ggsave(&quot;bar.png&quot;, width=10, height = 6)</code></pre>
 <p>Notice how the bar plot hides the real range of the data. This is what it would look like plotted with the y-axis ranges shown below.</p>
@@ -78,6 +79,7 @@ my_theme &lt;- theme(
   ylim(-5, 5) +
   scale_fill_manual(values = c(&quot;#3D66CC&quot;, &quot;#892110&quot;)) +
   my_theme</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;sex&#39; (override with `.groups` argument)</code></pre>
 <p><img src="/posts/plot_comparison_files/figure-html/plotcomp-bar-range-1.png" width="672" /></p>
 </div>
 <div id="violinbox-plot" class="section level2">
@@ -104,9 +106,9 @@ my_theme &lt;- theme(
     mean = mean(dv),
     min = mean(dv) - qnorm(0.975)*sd(dv)/sqrt(n()),
     max = mean(dv) + qnorm(0.975)*sd(dv)/sqrt(n())
-  )
-
-data %&gt;%
+  )</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;sex&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code>data %&gt;%
   ggplot(aes(sex, dv, fill = face_sex)) +
   geom_hline(yintercept=0, color=textcolor, size=1) +
   geom_violin(color=textcolor, trim=FALSE, alpha = 0.5) +
@@ -204,9 +206,9 @@ geom_split_violin &lt;- function (mapping = NULL,
     mean = mean(dv),
     min = mean(dv) - qnorm(0.975)*sd(dv)/sqrt(n()),
     max = mean(dv) + qnorm(0.975)*sd(dv)/sqrt(n())
-  )
-
-data %&gt;%
+  )</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;sex&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code>data %&gt;%
   ggplot(aes(sex, dv, fill = face_sex)) +
   geom_hline(yintercept=0, color=textcolor, size=1) +
   geom_split_violin(color=textcolor, trim=FALSE, alpha = 0.5) +
