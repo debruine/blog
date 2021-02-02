@@ -9,21 +9,20 @@ tags: ["r", "normality", "qqplot"]
 
 
 
-<p>You’ve probably been directed here because you asked someone about how to test the normality of predictors in an analysis. In this blog post, I’m going to use data simulation to explain why it’s only the normality of <em>residuals</em> that matters and how you can visualise this with QQ plots.</p>
+<p>You’ve probably been directed here because you asked someone about how to test the normality of predictors in an analysis. However, statistical tests like t-tests, ANOVAs, and other <a class='glossary' target='_blank' title='' href='https://psyteachr.github.io/glossary/g#general-linear-model'>GLM</a>-based tests assume that the <a class='glossary' target='_blank' title='' href='https://psyteachr.github.io/glossary/r#residual-error'>residuals</a> will be normally distributed and it doesn’t matter at all if the <a class='glossary' target='_blank' title='' href='https://psyteachr.github.io/glossary/p#predictor-variable'>predictors</a> and even the <a class='glossary' target='_blank' title='' href='https://psyteachr.github.io/glossary/d#dependent-variable'>dependent variable</a> aren’t.</p>
 <pre class="r"><code>library(tidyverse) # for data wrangling
 library(faux)      # for data simulation
 library(afex)      # for anova
 library(cowplot)   # for dataviz
 set.seed(8675309)  # to make sure simulation values don&#39;t vary between runs</code></pre>
-<p>First I want to emphasise that statistical tests like t-tests, ANOVAs, and other <a class='glossary' target='_blank' title='A mathematical model comparing how one or more independent variables affect a continuous dependent variable' href='https://psyteachr.github.io/glossary/g#general-linear-model'>GLM</a>-based tests assume that the <a class='glossary' target='_blank' title='That part of an observation that cannot be captured by the statistical model, and thus is assumed to reflect unknown factors.' href='https://psyteachr.github.io/glossary/r#residual-error'>residuals</a> will be normally distributed and it doesn’t matter at all if the <a class='glossary' target='_blank' title='A variable whose value is used (in a model) to predict the value of a response variable.' href='https://psyteachr.github.io/glossary/p#predictor-variable'>predictors</a> and even the <a class='glossary' target='_blank' title='The target variable that is being analyzed, whose value is assumed to depend on other variables.' href='https://psyteachr.github.io/glossary/d#dependent-variable'>dependent variable</a> aren’t.</p>
-<p>Let’s simulate some data to demonstrate this. We’re going to simulate data from a totally hypothetical population of ferrets and cats. We’re going to try to predict the energy levels of these pets from their weight. In my limited experience, tiny ferrets are way more energetic than big ferrets. I know nothing about cats.</p>
+<p>In this blog post, I’m going to use data simulation to show you how you can visualise the normality of residuals with QQ plots. We’re going to simulate data from a totally hypothetical population of ferrets and cats. We’re going to try to predict the energy levels of these pets from their weight. In my limited experience, tiny ferrets are way more energetic than big ferrets. I know nothing about cats.</p>
 <div class="figure">
 <img src="/images/darwin_oy.png" alt="" />
 <p class="caption">Tiny, energetic Darwin and her big, lazy brother, Oy</p>
 </div>
 <div id="simulate-data" class="section level2">
 <h2>Simulate Data</h2>
-<p>At the moment, <a href="https://debruine.github.io/faux/">faux</a> can only simulate multivariate normal distributions and then you can convert them to other distributions. So we’ll simulate weights from a normal distribution with a mean of 0 and SD of 1, and then convert these to a uniform distribution for each pet type based on ranges I found online. Energy will be simulated from normal distributions with different means and SDs for cats and ferrets. Energy will be uncorrelated with weight for cats and negatively correlated for ferrets.</p>
+<p>We’ll use <a href="https://debruine.github.io/faux/">faux</a> to simulate data based on data parameters like means, SDs and correlations for each group. At the moment, faux can only simulate multivariate normal distributions and then you can convert them to other distributions. So we’ll simulate weights from a normal distribution with a mean of 0 and SD of 1, and then convert these to a uniform distribution for each pet type based on ranges I found online. Energy will be simulated from normal distributions with different means and SDs for cats and ferrets. Energy will be uncorrelated with weight for cats and negatively correlated for ferrets.</p>
 <pre class="r"><code>data &lt;- faux::sim_design(
   within = list(vars = c(&quot;weight&quot;, &quot;energy&quot;)),
   between = list(species = c(&quot;cat&quot;, &quot;ferret&quot;)),
@@ -39,7 +38,7 @@ set.seed(8675309)  # to make sure simulation values don&#39;t vary between runs<
     species == &quot;cat&quot; ~ norm2unif(weight, 3.6, 4.5),
     species == &quot;ferret&quot; ~ norm2unif(weight, 0.7, 2.0)
   ))</code></pre>
-<p>N.B. If you’re more used to <a href="https://debruine.github.io/tutorials/sim-data.html#intercept-model">simulating data using model parameters</a>, this way might make more sense to you, but it’s often difficult to figure out what the parameters should be if you don’t already have pilot data.</p>
+<p>N.B. If you’re more used to <a href="https://debruine.github.io/tutorials/sim-data.html#intercept-model">simulating data using model parameters</a>, this way might make more sense to you, but it’s often difficult to figure out what the model parameters should be if you don’t already have pilot data.</p>
 <pre class="r"><code>n &lt;- 50
 
 # values approximated from an lm analysis
@@ -82,6 +81,19 @@ data &lt;- bind_rows(cat, ferret) %&gt;%
 Figure 1: Distibutions overall and within species.
 </p>
 </div>
+<p>If you run a Shapiro-Wilk test on these variables, you’d conclude they are <em>definitely</em> not normally distributed, but this doesn’t matter at all!</p>
+<pre class="r"><code>shapiro.test(data$energy)</code></pre>
+<pre><code>## 
+##  Shapiro-Wilk normality test
+## 
+## data:  data$energy
+## W = 0.95486, p-value = 0.001759</code></pre>
+<pre class="r"><code>shapiro.test(data$weight)</code></pre>
+<pre><code>## 
+##  Shapiro-Wilk normality test
+## 
+## data:  data$weight
+## W = 0.82694, p-value = 1.821e-09</code></pre>
 </div>
 <div id="calculate-residuals" class="section level2">
 <h2>Calculate Residuals</h2>
@@ -135,11 +147,21 @@ m1 &lt;- lm(energy ~ weight*species.e, data = data)</code></pre>
 <pre class="r"><code>err &lt;- resid(m1)
 
 ggplot() + geom_density(aes(err))</code></pre>
-<p><img src="/posts/normality_files/figure-html/unnamed-chunk-6-1.png" width="100%" /></p>
+<p><img src="/posts/normality_files/figure-html/unnamed-chunk-8-1.png" width="100%" /></p>
+</div>
+<div id="shapiro-wilk" class="section level2">
+<h2>Shapiro-Wilk</h2>
+<p>I don’t recommend using statistical tests for normality. Essentially, they are underpowered in small samples and overpowered in large samples. <a href="https://towardsdatascience.com/stop-testing-for-normality-dba96bb73f90">Robert Greener has a good discussion of this.</a>. However, the residuals do “pass” the Shapiro-Wilk normality test.</p>
+<pre class="r"><code>shapiro.test(err)</code></pre>
+<pre><code>## 
+##  Shapiro-Wilk normality test
+## 
+## data:  err
+## W = 0.99579, p-value = 0.9905</code></pre>
 </div>
 <div id="qq-plots" class="section level2">
 <h2>QQ plots</h2>
-<p>It’s quite hard to judge normality from a density plot, especially when you have small samples, so we can use a QQ plot to visualise how close a distribution is to normal.</p>
+<p>It’s better to assess normality visually, but it’s quite hard to judge normality from a density plot, especially when you have small samples, so we can use a QQ plot to visualise how close a distribution is to normal.</p>
 <p>These data are simulated, so will show an almost perfect straight line. Real data are always a bit messier. But even here, the points at the extremes are often not exactly on the line. It takes practice to tell if a QQ-plot shows clear signs of non-normality.</p>
 <pre class="r"><code># ggplot function for more customisation
 qplot(sample = err) + 
@@ -147,41 +169,15 @@ qplot(sample = err) +
   labs(x = &quot;Theoretical distribution&quot;,
        y = &quot;Sample distribution&quot;,
        title = &quot;QQ Plot for Residual Error&quot;)</code></pre>
-<p><img src="/posts/normality_files/figure-html/unnamed-chunk-7-1.png" width="100%" /></p>
-<p>So what does our bimodal energy data look like? This sort of QQ plot is less normal (see how the points move away from the line at the ends), but that doesn’t matter for your model at all.</p>
+<p><img src="/posts/normality_files/figure-html/unnamed-chunk-10-1.png" width="100%" /></p>
+<p>Our bimodal energy data are a good example of a QQ plot showing a non-normal distribution (see how the points move away from the line at the ends), but that doesn’t matter for your model at all.</p>
 <pre class="r"><code>ggplot(data, aes(sample = energy)) +
   stat_qq() +
   stat_qq_line(colour = &quot;dodgerblue&quot;) +
   labs(x = &quot;Theoretical distribution&quot;,
        y = &quot;Sample distribution&quot;,
        title = &quot;QQ Plot for Energy&quot;)</code></pre>
-<p><img src="/posts/normality_files/figure-html/unnamed-chunk-8-1.png" width="100%" /></p>
-<p>And you can see that weight is extremely non-normal.</p>
-<pre class="r"><code>ggplot(data, aes(sample = weight)) +
-  stat_qq() +
-  stat_qq_line(colour = &quot;dodgerblue&quot;) +
-  labs(x = &quot;Theoretical distribution&quot;,
-       y = &quot;Sample distribution&quot;,
-       title = &quot;QQ Plot for Weight&quot;)</code></pre>
-<p><img src="/posts/normality_files/figure-html/unnamed-chunk-9-1.png" width="100%" /></p>
-</div>
-<div id="statistical-tests" class="section level2">
-<h2>Statistical Tests</h2>
-<p>I don’t recommend using statistical tests for normality. Essentially, they are underpowered in small samples and overpowered in large samples. <a href="https://towardsdatascience.com/stop-testing-for-normality-dba96bb73f90">Robert Greener has a good discussion of this.</a></p>
-<p>You can see from the plots above that the energy values are not normally distributed, and this is what the tests for normality would also show.</p>
-<pre class="r"><code>shapiro.test(data$energy)</code></pre>
-<pre><code>## 
-##  Shapiro-Wilk normality test
-## 
-## data:  data$energy
-## W = 0.95486, p-value = 0.001759</code></pre>
-<p>However, the residuals do “pass” the Shapiro-Wilk normality test.</p>
-<pre class="r"><code>shapiro.test(err)</code></pre>
-<pre><code>## 
-##  Shapiro-Wilk normality test
-## 
-## data:  err
-## W = 0.99579, p-value = 0.9905</code></pre>
+<p><img src="/posts/normality_files/figure-html/unnamed-chunk-11-1.png" width="100%" /></p>
 </div>
 <div id="other-tests" class="section level2">
 <h2>Other tests</h2>
@@ -277,7 +273,7 @@ cowplot::plot_grid(plot_aov, plot_lm, labels = c(&quot;aov&quot;, &quot;lm&quot;
 <tbody>
 <tr class="odd">
 <td align="left"><a class='glossary' target='_blank' href='https://psyteachr.github.io/glossary/d#dependent.variable'>dependent variable</a></td>
-<td align="left">The target variable that is being analyzed, whose value is assumed to depend on other variables.</td>
+<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"><a class='glossary' target='_blank' href='https://psyteachr.github.io/glossary/e#effect.code'>effect code</a></td>
@@ -285,15 +281,15 @@ cowplot::plot_grid(plot_aov, plot_lm, labels = c(&quot;aov&quot;, &quot;lm&quot;
 </tr>
 <tr class="odd">
 <td align="left"><a class='glossary' target='_blank' href='https://psyteachr.github.io/glossary/g#general.linear.model'>general linear model</a></td>
-<td align="left">A mathematical model comparing how one or more independent variables affect a continuous dependent variable</td>
+<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"><a class='glossary' target='_blank' href='https://psyteachr.github.io/glossary/p#predictor.variable'>predictor variable</a></td>
-<td align="left">A variable whose value is used (in a model) to predict the value of a response variable.</td>
+<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"><a class='glossary' target='_blank' href='https://psyteachr.github.io/glossary/r#residual.error'>residual error</a></td>
-<td align="left">That part of an observation that cannot be captured by the statistical model, and thus is assumed to reflect unknown factors.</td>
+<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"><a class='glossary' target='_blank' href='https://psyteachr.github.io/glossary/t#treatment.code'>treatment code</a></td>
