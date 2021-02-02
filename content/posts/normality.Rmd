@@ -58,6 +58,8 @@ You've probably been directed here because you asked someone about how to test t
 ```{r libs, message=FALSE}
 library(tidyverse) # for data wrangling
 library(faux)      # for data simulation
+library(afex)      # for anova
+library(cowplot)   # for dataviz
 set.seed(8675309)  # to make sure simulation values don't vary between runs
 ```
 
@@ -307,6 +309,7 @@ plot_lm <- qplot(sample = err_lm) + stat_qq_line()
 
 cowplot::plot_grid(plot_t, plot_lm, labels = c("t", "lm"))
 ```
+
 ### ANOVA
 
 You can use the `resid()` function on the models output by ANOVAs or ANCOVAs.
