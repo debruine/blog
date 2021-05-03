@@ -23,7 +23,7 @@ slug = "projects"
   An open source, online tool for morphing and transforming faces  
   [ 
   [web app](https://webmorph.org) | 
-  [R package](https://facelab.github.io/webmorph/) | 
+  [R package](https://debruine.github.io/webmorphR/) | 
   [doi](https://doi.org/10.5281/zenodo.1073696) ]
 * [experimentum](https://exp.psy.gla.ac.uk) An open-source, online platform for psychology studies  
   [ 
